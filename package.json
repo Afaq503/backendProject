@@ -1,0 +1,15 @@
+{
+  "name": "backendproject",
+  "version": "1.0.0",
+  "description": "Backend project on like \"Youtube\" Clone",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascripte",
+    "backend"
+  ],
+  "author": "Muhammad Afaq",
+  "license": "ISC"
+}
