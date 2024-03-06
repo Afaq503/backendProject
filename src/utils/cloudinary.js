@@ -1,7 +1,13 @@
 import { v2 as cloudinary } from "cloudinary";
 
+import dotenv from "dotenv";
+
 import fs from 'fs'
 
+dotenv.config({
+    path: "./.env",
+    // path: "./env" this is worng
+  });
           
 cloudinary.config({ 
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -17,7 +23,8 @@ const uploadOnCloudinary = async (localFilePath) => {
             resource_type: 'auto'
         })
         // file hase been uploaded successfully
-        console.log("File is uploaded on cloudinary",response.url);
+        // console.log("File is uploaded on cloudinary",response.url);
+        fs.unlinkSync(localFilePath)
         return response
     } catch (error) {
         fs.unlinkSync(localFilePath) // remove temporary file as ths upload operation got failed
