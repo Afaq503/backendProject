@@ -3,15 +3,32 @@ import { ApiError } from "../utils/Apierror.js";
 import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import dotenv from 'dotenv';
+
+
+
+dotenv.config({
+  path: "./.env",
+  // path: "./env" this is worng
+});
+
+
 
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
+    console.log("userID ok:  ",userId);
     const user = await User.findById(userId);
+    // console.log(`user in function generateAccessAndRefereshTokens:  ${user}`);
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
+    // console.log(`accessToken:  ${accessToken}`);
+    // console.log(`refreshToken:  ${refreshToken}`);
+
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
+
+    // console.log(`user.refreshToken:  ${user.refreshToken}`);
 
     return { accessToken, refreshToken };
   } catch (error) {
@@ -103,7 +120,9 @@ const loginUser = asynchandler(async (req, res) => {
   // access and refresh token genrate
   // send cookie
   const { email, username, password } = req.body;
-  if (!username || !email) {
+  console.log(`this is my email:  ${email}`);
+ 
+  if (!username && !email) {
     throw new ApiError(400, "username or email is required");
   }
 
@@ -115,6 +134,12 @@ const loginUser = asynchandler(async (req, res) => {
     throw new ApiError(404, "User does not exist");
   }
 
+
+   // Ensure the password is provided before attempting to validate it
+   if (!password) {
+    throw new ApiError(400, "Password is required");
+  }
+
   const isPasswordValid = await user.isPasswordCorrect(password);
 
   if (!isPasswordValid) {
@@ -122,7 +147,8 @@ const loginUser = asynchandler(async (req, res) => {
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
-    user._id
+    user._id,
+    console.log(`User in fucation:  ${user._id}`)
   );
 
   const loggedInUser = await User.findById(user._id).select(
