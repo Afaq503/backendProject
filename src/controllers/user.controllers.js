@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import Jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config({
   path: "./.env",
@@ -422,6 +423,52 @@ const getUserChannelProfile = asynchandler(async (req, res) => {
     .json(new ApiResponse(200, channel[0], "User channel fetched successfuly"));
 });
 
+// res
+
+const getWatchHistory = asynchandler(async(req, _) => {
+  const user = await User.aggregate([
+    {
+      $match:{
+        _id: new mongoose.Types.ObjectId(req.user._id)
+      },
+    },
+    {
+      $lookup:{
+        from:"Video",
+        localField:"watchHistory",
+        foreignField:"_id",
+        as:"watchHistory",
+        pipeline:[
+          {
+            $lookup:{
+              from:"user",
+              localField:"owner",
+              foreignField:"_id",
+              as:"owner",
+              pipeline:[
+                {
+                  $project:{
+                    fullname:1,
+                    username:1,
+                    avatar:1,
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields:{
+              owner:{
+                $first:"$owner"
+              }
+            }
+          }
+        ],
+      }
+    }
+  ])
+})
+
 export {
   registerUser,
   loginUser,
@@ -433,4 +480,5 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
+  getWatchHistory
 };
